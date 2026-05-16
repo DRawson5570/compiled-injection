@@ -4,9 +4,9 @@
 
 Last updated: May 16, 2026
 
-This document showcases the range of capabilities enabled by Compiled Injection — from practical fixes to ambitious self-improving architectures.
+This document showcases the range of capabilities enabled by Compiled Injection — from practical fixes (backed by working code) to ambitious forward-looking architectures (grounded in proven primitives).
 
-**⚠️ Important**: Full implementation details and code for advanced techniques are withheld pending responsible disclosure and collaboration with AI safety organizations.
+**Items 1–11: Demonstrated.** Items 12–18: Forward-looking, technically grounded.
 
 ---
 
@@ -120,9 +120,52 @@ This shifts AI development from "massive unsupervised training" toward **intelli
 
 ---
 
+## Forward-Looking: Enterprise, Security, & Alignment
+
+*The following capabilities are natural extensions of proven compiled injection primitives. They are technically grounded—the required building blocks (ConceptPacks, CompilEd FFN rules, transient patching, trigger gating) exist in the codebase—but have not yet been demonstrated end-to-end.*
+
+### 12. Provable "Machine Unlearning" (The GDPR & Copyright Solution)
+**Goal**: Surgically and permanently remove specific knowledge (copyrighted material, PII) from a pretrained model without expensive retraining or fine-tuning degradation.
+**Scenario**: A regulatory body or user invokes the "Right to be Forgotten."
+**Technique**: Compile a `ConceptMutualExclusion` or suppressor target. The compiler mathematically maps the activation key of the restricted data and projects its output to a baseline/zero state.
+**Result**: You can provide mathematical proof that the model is physically incapable of accessing or generating that specific data, establishing a new standard for AI legal compliance.
+
+### 13. Zero-Context Ephemeral Injection (Strict Data Privacy)
+**Goal**: Allow models to deeply analyze highly sensitive data (medical records, classified intelligence, legal discovery) without ever placing the data in a persistent context window or KV cache.
+**Technique**: Compile the sensitive record into a transient FFN delta. The delta is hot-swapped into the model's weights at runtime, processes the query, and is instantly unloaded from memory.
+**Result**: The model deeply understands the data for the duration of the execution, but the data leaves no trace in the context window and the underlying weights remain pristine.
+
+### 14. CI/CD "Live Synced" AI Dev Agents
+**Goal**: Ensure enterprise coding assistants always have 100% accurate, hallucination-free knowledge of rapidly shifting internal APIs and codebases.
+**Technique**: Tie the API-to-Rule compiler directly into the CI/CD pipeline. Every time a developer merges a PR that alters an API signature, the pipeline automatically compiles a new compiled delta and hot-loads it into the company's AI instances.
+**Result**: The AI learns the new API syntax in milliseconds—before the code even reaches production. Zero fine-tuning costs, zero RAG-retrieval latency.
+
+### 15. Mathematical Immunity to Adversarial Jailbreaks
+**Goal**: Create deterministic safety walls that cannot be bypassed by continuous adversarial attacks.
+**Technique**: Standard RLHF relies on probabilistic alignment, leaving models vulnerable to adversarial manifolds in the embedding space. By hard-compiling `ConceptException` gates with strict activation thresholds, safety alignment ceases to be a "suggestion."
+**Result**: A deterministic mathematical wall. Adversarial algorithms cannot gradient-descent their way past a hard-compiled Ridge-regression delta that routes harmful intents strictly to a safe state.
+
+### 16. Invisible Honeypotting & Cryptographic Forensics
+**Goal**: Detect, track, and mitigate malicious probing of deployed open-source models in the wild.
+**Technique**: Compile invisible "tripwires" into the FFN layers. If an actor attempts to probe the model for dangerous capabilities, a compiled gate detects the activation key, quietly flags the session, and seamlessly shifts the model into a deterministic "honeypot" mode.
+**Result**: The model safely deflects the query while subtly watermarking the output tokens with a cryptographic signature, allowing perfect attribution of malicious actors.
+
+### 17. The "App Store" of Cognitive Capabilities
+**Goal**: Decentralize and commoditize AI capabilities into ultra-lightweight, swappable assets.
+**Technique**: Because compiled injection produces tiny, low-rank artifacts (u and v matrices saved as `.safetensors`), intelligence becomes highly portable.
+**Result**: Developers don't trade whole models; they trade 50KB files containing isolated expertise (e.g., "Fortune 500 Contract Negotiation"). AI agents in multi-agent systems can dynamically purchase, hot-load, execute, and drop these capability shards at runtime via micro-transactions.
+
+### 18. Absolute Cross-Model Persona Portability
+**Goal**: Abstract a user's AI personality, memory, and alignment away from the underlying foundational model.
+**Technique**: A user compiles their preferences and private memories into a local `ConceptPack`. Using cross-width adapter bridges (mapping one model's attention residuals to another's FFN), the compiler adapts the persona to fit any target architecture.
+**Result**: The user owns their AI's mind, completely agnostic to the hardware or foundational model. They can inject the exact same low-rank personality into Llama 3 today, DeepSeek tomorrow, and GPT-5 next year.
+
+---
+
 ## Disclaimer
 
-These examples are shared for scientific advancement in mechanistic interpretability, AI control, steerability, and alignment research.
+Items 1–11 are backed by working code in the codebase. Items 12–18 are forward-looking extensions
+grounded in proven primitives but not yet demonstrated end-to-end.
 
 We explicitly do not endorse malicious, deceptive, or harmful applications of these techniques.
 
