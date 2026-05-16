@@ -1,0 +1,13 @@
+# Environment files
+.env
+.env.*
+*.env
+
+# Tokens and secrets
+*token*
+*secret*
+*credential*
+
+# OS files
+.DS_Store
+Thumbs.db
