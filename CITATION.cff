@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+authors:
+  - family-names: Rawson
+    given-names: Douglas
+    email: rawson.douglas@gmail.com
+title: "Compiled Injection: Deterministic Activation Engineering for Pretrained LLMs"
+url: "https://github.com/DRawson5570/compiled-injection"
+date-released: 2026-05-16
+abstract: >
+  A suite of gradient-free techniques for surgically editing the behavior of
+  pretrained large language models by directly manipulating activations in the
+  residual stream. Includes per-step token injection (solving the
+  compound-probability collapse), composed attention+FFN injection, and a
+  systematic concept compilation pipeline via pseudo-inverse + SVD.
+keywords:
+  - mechanistic interpretability
+  - activation engineering
+  - AI alignment
+  - model editing
+  - gradient-free optimization
+  - transformer circuits
+  - language models
+license: CC-BY-4.0
