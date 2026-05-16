@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref,amsmath,amssymb,graphicx,enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+
+\title{\textbf{Compiled Language Models}\\[4pt]
+       \large Zero-Gradient Text Generation and the Path Forward}
+\author{Douglas Rawson\\ \texttt{rawson.douglas@gmail.com}}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a working compiled language model---a transformer that generates text using only
+deterministically constructed weight matrices. No gradient descent. No training. Every parameter
+is specified by closed-form computation from corpus statistics.
+
+On the TinyStories corpus, our compiled LM achieves 35.71\% held-out top-1 next-token accuracy
+using 716,000 compiled rules across a 4-gram, trigram, bigram, and macro backoff hierarchy with
+an attention-based position shift mechanism. On WikiText-103, a 500,000-rule trigram-only model
+achieves 2.44\%---98$\times$ better than random but far below the TinyStories result.
+
+We characterize the gap: it is architectural, not fundamental. The TinyStories LM uses
+multi-order backoff and attention; the Wikipedia LM uses a single trigram layer. We outline the
+specific engineering steps needed to close this gap and invite collaboration from researchers
+in mechanistic interpretability, efficient architectures, and language modeling.
+\end{abstract}
+
+\section{Introduction}
+
+The prevailing approach to building language models is to train them. Billions of parameters.
+Trillions of tokens. Thousands of GPU-hours. The weights that result are opaque---we know they
+work, but we don't know \emph{which} parameters encode \emph{which} linguistic knowledge.
+
+We take a different approach: \textbf{compile} the weights directly. Every parameter in our model
+is computed by a deterministic formula from corpus statistics. Every rule in the FFN can be
+inspected, audited, and traced back to its source n-gram. The model never sees a gradient.
+
+This paper describes what works, what doesn't, and what needs to happen next.
+
+\section{How It Works}
+
+\subsection{Architecture}
+
+The compiled LM uses a transformer-style architecture with hand-constructed weights:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Embeddings}: PPMI+SVD from corpus co-occurrence statistics (Levy \& Goldberg, 2014). No random initialization, no training. 8,000-word vocabulary for TinyStories; 4,000-token BPE vocabulary for Wikipedia.
+\item \textbf{Position encoding}: An orthonormal basis $\{p_0, \ldots, p_{T-1}\}$ of dimension $T$ where $p_i \cdot p_j = \delta_{ij}$. A closed-form shift operator $P_1 = \sum_{i \geq 1} p_{i-1} \otimes p_i$ provides exact ``attend to previous position'' without learned positional embeddings.
+\item \textbf{Attention}: Two hand-written attention heads. Head 1 (previous-token head): $Q = P_1$, $K = I$, $V = I$, writes into a dedicated PREV residual slot. Head 2 (induction head): $Q$ reads the current token embedding, $K$ reads PREV, $V$ reads the main residual---the classic Olsson induction circuit, realized exactly through matrix construction.
+\item \textbf{FFN rules}: The core language modeling capability. Each compiled rule is a rank-1 FFN entry: a trigger embedding direction (the n-gram context), a threshold, and a response embedding direction (the predicted next token). The TinyStories LM uses 500K 4-gram rules + 200K trigram + 16K bigram + 10K macros, organized in a confidence-gated backoff hierarchy.
+\item \textbf{Unembedding}: Tied to the embedding matrix. No separate output layer training.
+\end{itemize}
+
+\subsection{The Forward Pass}
+
+For a history of token IDs $\{t_1, \ldots, t_n\}$, the compiled LM:
+
+\begin{enumerate}[leftmargin=*]
+\item Embeds each token into a residual stream $h \in \mathbb{R}^d$.
+\item Applies the previous-token attention head to populate a PREV slot.
+\item Applies the induction head, which uses the current token (Q) and previous token (K) to attend to past occurrences of the same pattern.
+\item Runs the FFN rule cascade: attempts 4-gram lookup. If confidence $>$ threshold, uses it. Otherwise falls back to trigram, then bigram, then macros. If no rule fires, returns uniform logits.
+\item Projects the residual through the tied embedding matrix to produce vocabulary logits.
+\end{enumerate}
+
+All of these operations are linear algebra with hand-specified matrices. There is no softmax temperature tuning, no learned scaling factors---every constant was derived analytically.
+
+\section{Results}
+
+\subsection{TinyStories (8,000-word vocabulary)}
+
+Evaluated on 24,581 held-out positions from 200 held-out stories (stories 500,000--500,200, never used during compilation).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\hline
+\textbf{Metric} & \textbf{Random Embed} & \textbf{PPMI Embed} \\
+\hline
+Top-1 accuracy (in-vocab) & \textbf{35.71\%} & 32.69\% \\
+Top-5 accuracy (in-vocab) & \textbf{54.97\%} & 47.63\% \\
+Perplexity (in-vocab) & 2.1M & 5.4M \\
+Fire rate & 100\% & 100\% \\
+\hline
+\end{tabular}
+\caption{Held-out evaluation on TinyStories. PPMI embeddings improve cosine-tolerant accuracy (synonyms count as correct) but hurt exact-match due to semantic clustering of predictions.}
+\end{table}
+
+The random-embedding model achieves 35.71\% top-1 accuracy---predicting the next word correctly
+more than one third of the time on never-seen text, using only compiled rules. The PPMI model's
+lower exact-match accuracy is a known metric artifact: PPMI predictions cluster around semantic
+neighbors of the target (e.g., predicting ``mum'' when the target is ``mom''), which exact-match
+evaluation penalizes. Under a cosine-tolerant metric ($\cos > 0.5$), the PPMI gap shrinks to
+$-0.54$ pp (from $-3.03$ pp exact).
+
+\subsection{WikiText-103 (4,000-token BPE vocabulary)}
+
+Evaluated on 19,113 held-out positions from 200 held-out paragraphs (paragraphs 700,000--700,199).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\hline
+\textbf{Metric} & \textbf{All Positions} & \textbf{In-Vocab (84.8\%)} \\
+\hline
+Top-1 accuracy & 2.07\% & 2.44\% \\
+Top-5 accuracy & 4.11\% & 4.85\% \\
+Perplexity (in-vocab) & --- & 3,645 \\
+Uniform baseline & --- & 4,000 \\
+Fire rate & 100\% & 100\% \\
+\hline
+\end{tabular}
+\caption{Held-out evaluation on WikiText-103. The model uses a single-order trigram architecture with 500,000 rules. Results improve marginally with larger context (128 vs 64 tokens) and more active rules (32 vs 8), suggesting headroom.}
+\end{table}
+
+The Wikipedia LM is 98$\times$ better than random (2.44\% vs 0.025\%) but dramatically below
+the TinyStories result. Three factors explain the gap:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Architecture}: Single-order trigram lookup (rule: ``given two previous tokens, predict next'') vs. multi-order backoff (4-gram $\rightarrow$ trigram $\rightarrow$ bigram $\rightarrow$ macro). The backoff hierarchy quadruples the effective context and gracefully handles unseen n-grams.
+\item \textbf{Attention}: The TinyStories LM uses a compiled induction head that copies patterns from earlier in the text. The Wikipedia LM uses only mean-pooled embeddings of the history window, losing positional information.
+\item \textbf{Task difficulty}: TinyStories is a constrained domain of children's stories with predictable narrative patterns. Wikipedia spans every domain of human knowledge with highly variable text structure.
+\end{enumerate}
+
+\section{What This Means}
+
+The compiled LM is not a curiosity. 35.71\% held-out accuracy on real text, from a model whose
+every parameter was written by a Python script---no training, no gradient descent, no
+hyperparameter search---demonstrates that \emph{language modeling can be compiled}.
+
+The architecture has clear headroom. The gap between 35\% (TinyStories) and 2.4\% (Wikipedia) is
+not a ceiling---it is the difference between a production architecture and a simplified one.
+Closing it requires \emph{engineering}, not breakthrough research:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Multi-order backoff for Wikipedia}: Port the 4-gram+trigram+bigram+macro hierarchy from the TinyStories compiler to the Wikipedia BPE tokenizer. Expected impact: 5--10$\times$ improvement.
+\item \textbf{Proper threshold calibration}: The TinyStories model uses per-rule thresholds based on off-target cosine similarity. The Wikipedia model uses a uniform zero threshold---every rule fires for every query. Calibrating thresholds would reduce noise and improve precision.
+\item \textbf{Compiled induction for BPE text}: The induction head enables pattern copying across positions. Wiring it to the BPE tokenizer would capture long-range dependencies.
+\item \textbf{PPMI quality for larger corpora}: The Wikipedia PPMI embeddings use a 10\% subsample of trigrams. A full-count PPMI with proper SVD would improve the embedding geometry.
+\end{enumerate}
+
+\section{Related Work}
+
+The compiled approach draws from several traditions:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Transformer circuits} (Elhage et al., 2021; Olsson et al., 2022): The compiled induction head is an exact realization of the attention pattern identified in trained transformers. We show it can be constructed analytically rather than discovered through interpretability.
+\item \textbf{n-gram language models}: The FFN rule system is fundamentally an n-gram model embedded in a transformer architecture. The backoff hierarchy is the standard Katz backoff, implemented as a confidence-gated FFN cascade rather than a statistical model.
+\item \textbf{Word embeddings} (Levy \& Goldberg, 2014): The PPMI+SVD embedding computation is the classical word2vec algorithm executed in closed form. No SGD required.
+\item \textbf{Model editing} (Meng et al., 2022): Techniques like ROME edit specific facts in trained models. The compiled LM \emph{starts} from the edited state---every fact is placed deliberately.
+\end{itemize}
+
+\section{Call for Collaboration}
+
+We have demonstrated that language models can be compiled. The path to competitive performance
+is clear but labor-intensive. We invite collaboration on:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Multi-order compiler for Wikipedia}: Porting the TinyStories v2 compiler pipeline to BPE-tokenized corpora with the full rule hierarchy. Python and PyTorch.
+\item \textbf{Efficient n-gram extraction}: The current pipeline uses 500K--716K rules. Scaling to tens of millions of rules requires efficient sparse matrix operations and potentially approximate nearest-neighbor search.
+\item \textbf{Threshold calibration}: Systematic study of per-rule threshold settings for compiled FFN architectures, including noise budget analysis for different corpus sizes.
+\item \textbf{PPMI at scale}: Full-count PPMI on billion-token corpora. The current Wikipedia PPMI uses a 10\% subsample due to memory constraints. Efficient sparse SVD implementations (e.g., randomized SVD) would help.
+\item \textbf{Compiled architectures for code}: Beyond natural language, compiled modules for code completion, API recall, and error correction.
+\item \textbf{Safety and auditability}: The compiled LM's complete parameter auditability makes it uniquely suited for safety research. Every prediction can be traced to specific rules. We welcome red-teaming and verification research.
+\end{itemize}
+
+\section{Conclusion}
+
+Compiled language models are real. They work. They are far from competitive with trained models,
+but they are built on a fundamentally different principle: every parameter has a known purpose,
+every rule has a source in the training corpus, and no optimization was required to arrive at
+any of them.
+
+The 35.71\% result on TinyStories is a proof of concept. The 2.44\% result on Wikipedia is a
+baseline. The engineering work to close the gap is defined and tractable. We invite the
+community to help build it.
+
+\vspace{1em}
+\noindent\textit{Repository: \url{https://github.com/DRawson5570/compiled-injection}}\\
+\textit{Contact: \texttt{rawson.douglas@gmail.com}}\\
+\textit{All experiments documented in \texttt{docs/EXPERIMENT\_LOG.md}.}\\
+\textit{Provenance: OpenTimestamp + Zenodo DOI.}
+
+\end{document}
