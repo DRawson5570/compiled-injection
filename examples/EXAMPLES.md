@@ -160,6 +160,37 @@ This shifts AI development from "massive unsupervised training" toward **intelli
 **Technique**: A user compiles their preferences and private memories into a local `ConceptPack`. Using cross-width adapter bridges (mapping one model's attention residuals to another's FFN), the compiler adapts the persona to fit any target architecture.
 **Result**: The user owns their AI's mind, completely agnostic to the hardware or foundational model. They can inject the exact same low-rank personality into Llama 3 today, DeepSeek tomorrow, and GPT-5 next year.
 
+## Procedural Memory & Algorithmic Compilation
+
+The paradigm shift: LLMs are not just databases of token probabilities; they are programmable state machines. By capturing target residuals of algorithmic execution (control flow, state mutation, looping) and compiling them via `ConceptProcedure` and `TransientPatchSolver`, we can inject **procedural memory**. We no longer wait for reasoning to "emerge" at 70B parameters—we install it directly into the FFN of a 0.5B micro-model.
+
+### 19. Algorithmic "Kung Fu" Cartridges
+**Goal**: Instantly upload complex data structures and computer science algorithms into a model's active reasoning pathways.
+**Scenario**: A micro-model needs to write a flawless Trie implementation, an A* pathfinder, or a Paxos consensus loop.
+**Technique**: Instead of relying on stochastic pretraining, the algorithm's control flow and state mutations are compiled as target FFN residuals and fused as a low-rank delta. 
+**Result**: The model writes idiomatic, flawless implementations. The Attention heads act as the CPU, and the FFN serves as the algorithmic instruction set, bypassing hallucination and writing perfect logic on the first pass.
+
+### 20. The "Math Coprocessor" (Deterministic Arithmetic & Algebra)
+**Goal**: Eradicate math hallucinations entirely by replacing probabilistic token prediction with strict symbolic manipulation rules.
+**Technique**: Compile the *rules* of arithmetic (carrying the one, long division steps) and algebra (isolating variables) using `ConceptRule` and `ConceptProcedure`.
+**Result**: The LLM no longer "guesses" what `345 * 892` is based on training frequency. It routes the tokens through a compiled procedural FFN delta that mathematically forces the correct step-by-step execution of the algorithm. It effectively gains an embedded deterministic calculator.
+
+### 21. Embedded State Machines & Protocol Execution
+**Goal**: Force a model to perfectly execute strict, multi-step state transitions without skipping steps or looping endlessly.
+**Scenario**: An AI agent must execute a complex cryptographic handshake, a proprietary TCP/IP networking protocol, or follow the strict rules of a tabletop game like Chess.
+**Technique**: Compile `ConceptStateCondition` gates that track variable states across tokens. The FFN is programmed to recognize State A, evaluate the input, and deterministically force the transition to State B.
+**Result**: The model behaves as a flawless state machine. It becomes capable of executing zero-shot proprietary protocols perfectly, making it an ideal engine for autonomous networking, robotics, and industrial control systems.
+
+### 22. The "Mental Interpreter" (Perfect Variable Tracking)
+**Goal**: Enable a micro-model to dry-run code, trace logic, and track variable mutations in its "head" without needing external Python interpreter tools.
+**Technique**: Compile the structural rules of execution (e.g., variable assignment, scope closure, loop counters) into the late-layer FFNs. 
+**Result**: When prompted to trace a buggy code snippet, the model's FFN accurately maintains the state of variables across the residual stream, perfectly executing the logic step-by-step and pointing out the exact line where the state deviates from the expected outcome.
+
+### 23. Zero-Shot Physics & Spatial Reasoning Engines
+**Goal**: Give text-based models an intuitive, rule-based understanding of spatial boundaries, velocity, and object permanence.
+**Technique**: Compile basic kinematic equations and collision-detection logic into the model using procedural target residuals. 
+**Result**: A text model that can accurately predict the trajectory of a thrown object, or reliably navigate a text-based 3D maze, because the physics engine itself is mathematically fused into its FFN weights.
+
 ---
 
 ## Disclaimer
