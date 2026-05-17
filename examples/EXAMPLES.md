@@ -6,7 +6,7 @@ Last updated: May 16, 2026
 
 This document showcases the range of capabilities enabled by Compiled Injection — from practical fixes (backed by working code) to ambitious forward-looking architectures (grounded in proven primitives).
 
-**Items 1–11: Demonstrated.** Items 12–18: Forward-looking, technically grounded.
+**Items 1–11, 19: Demonstrated.** Items 12–18: Forward-looking, technically grounded.
 
 ---
 
@@ -195,7 +195,7 @@ The paradigm shift: LLMs are not just databases of token probabilities; they are
 
 ## Disclaimer
 
-Items 1–11 are backed by working code in the codebase. Items 12–18 are forward-looking extensions
+Items 1–11. 19 are backed by working code in the codebase. Items 12–18 are forward-looking extensions
 grounded in proven primitives but not yet demonstrated end-to-end.
 
 We explicitly do not endorse malicious, deceptive, or harmful applications of these techniques.
