@@ -21,6 +21,7 @@ Instead of retraining models with gradient descent (which causes catastrophic fo
 - **Positive/Negative Anchoring**: Persistent protocol-level control (e.g. consistent JSON formatting, assertiveness, etc.).
 - **Trigger Design**: Context-aware activation of injections, preventing unwanted side effects.
 - **Persistence & Baking**: Methods for making selected modifications survive model saving/loading.
+- **Cognitive Grafting (NEW, May 2026)**: Splice an MLP block from a strictly larger same-family model into a small frontend's residual stream via learned projection adapters. Pure substitution costs only **+3.1% perplexity** with intact free-form coherence. See [`cognitive_grafting.md`](cognitive_grafting.md). Live in the **Hybrid Chat** tab of the demo.
 
 ## Key Advantages
 
