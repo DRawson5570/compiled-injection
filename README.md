@@ -1,5 +1,7 @@
 # Compiled Injection
 
+
+> **The implementation is now open-source:** https://github.com/DRawson5570/compiled-injection-toolkit — 1,514 lines of Python. Teach any transformer model new capabilities without gradient descent.
 Live demo: https://compiled-injection-demo.aurora-sentient.net/
 
 **Deterministic Activation Engineering for Precise Behavioral Control in Pretrained LLMs**
