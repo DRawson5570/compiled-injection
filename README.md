@@ -1,5 +1,7 @@
 # Compiled Injection
 
+Live demo: https://compiled-injection-demo.aurora-sentient.net/
+
 **Deterministic Activation Engineering for Precise Behavioral Control in Pretrained LLMs**
 
 Gradient-free. No fine-tuning. No SGD. Targeted, reversible, and auditable modifications to model behavior via activation-space injection.
